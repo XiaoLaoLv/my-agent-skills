@@ -39,22 +39,28 @@ npm run package
 
 ## 安装到本机
 
+先在仓库内注册 CLI：
+
+```bash
+npm link
+```
+
 一次性安装仓库里的全部 skills 到 `~/.agents/skills/`：
 
 ```bash
-npm run install:local
+myagentskills
 ```
 
 安装到其他 agent 的 skills 目录：
 
 ```bash
-npm run install:local -- /path/to/agent/skills
+myagentskills -- /path/to/agent/skills
 ```
 
 也可以用环境变量指定目标目录：
 
 ```bash
-AGENT_SKILLS_DIR=/path/to/agent/skills npm run install:local
+AGENT_SKILLS_DIR=/path/to/agent/skills myagentskills
 ```
 
 安装脚本会覆盖目标目录里的同名 skill，但不会删除其他 skill。
@@ -63,19 +69,21 @@ AGENT_SKILLS_DIR=/path/to/agent/skills npm run install:local
 
 ## CLI 命令
 
-本项目提供 `myagentskills` 命令。开发时可在仓库内用：
-
-```bash
-npm link
-```
-
-之后可从任意目录运行：
+`myagentskills` 支持这些用法：
 
 ```bash
 myagentskills
 myagentskills -- /path/to/agent/skills
+myagentskills install /path/to/agent/skills
 myagentskills validate
 myagentskills package
 ```
 
 默认命令是安装：`myagentskills` 等价于安装全部 skills 到 `~/.agents/skills/`。
+
+不想注册 CLI 时，也可以在仓库内使用 npm 脚本：
+
+```bash
+npm run install:local
+npm run install:local -- /path/to/agent/skills
+```
