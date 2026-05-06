@@ -1,0 +1,18 @@
+{
+  "name": "agent-skills",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Personal collection of reusable agent skills.",
+  "scripts": {
+    "validate": "node scripts/validate-skills.js",
+    "package": "node scripts/package-skills.js",
+    "test": "npm run validate"
+  },
+  "keywords": [
+    "agent",
+    "skills",
+    "openclaw",
+    "codex"
+  ],
+  "license": "MIT"
+}

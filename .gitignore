@@ -1,0 +1,7 @@
+.DS_Store
+node_modules/
+reports/
+*.log
+
+# Keep release artifacts optional; remove this line if you want to commit .skill files.
+# dist/*.skill
