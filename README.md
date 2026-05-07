@@ -14,6 +14,8 @@ agent-skills/
 ## 已包含的 skills
 
 - `cn-hk-financial-report-downloader`：下载 A 股与港股上市公司财务报告 PDF。
+- `fins-report`：将财报 PDF 预处理为结构化 JSON，供后续查询使用。
+- `fins-query`：针对已预处理的财报目录与表格数据进行检索查询。
 
 ## 校验
 
