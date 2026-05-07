@@ -14,6 +14,7 @@ const excludeArgs = [
   "*/node_modules/*",
   "*/reports/*",
   "*/dist/*",
+  "*/.env",
   "*.log",
 ];
 

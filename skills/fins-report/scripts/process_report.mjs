@@ -19,15 +19,18 @@
  */
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync, createWriteStream, unlinkSync, readdirSync } from "node:fs";
+import { homedir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import { setTimeout as sleep } from "node:timers/promises";
+import { fileURLToPath } from "node:url";
 import { inflateRawSync } from "node:zlib";
 
 const API_BASE = "https://mineru.net/api/v4";
 const POLL_INTERVAL = 5000;
 const POLL_MAX_WAIT = 1_800_000;
+const SKILL_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
 function parseArgs(argv) {
   const args = {};
@@ -44,6 +47,39 @@ function parseArgs(argv) {
     }
   }
   return args;
+}
+
+function parseEnvFile(filePath) {
+  if (!existsSync(filePath)) return {};
+  const env = {};
+  const lines = readFileSync(filePath, "utf-8").split(/\r?\n/);
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) continue;
+    const idx = trimmed.indexOf("=");
+    if (idx === -1) continue;
+    const key = trimmed.slice(0, idx).trim();
+    let value = trimmed.slice(idx + 1).trim();
+    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+      value = value.slice(1, -1);
+    }
+    env[key] = value;
+  }
+  return env;
+}
+
+function resolveMineruToken(args) {
+  if (args.token) return args.token;
+  if (process.env.MINERU_API_TOKEN) return process.env.MINERU_API_TOKEN;
+
+  const skillEnv = join(SKILL_DIR, ".env");
+  const userEnv = join(homedir(), ".config", "my-agent-skills", "mineru.env");
+  for (const envPath of [skillEnv, userEnv]) {
+    const token = parseEnvFile(envPath).MINERU_API_TOKEN;
+    if (token && !token.includes("填入") && !token.includes("your_")) return token;
+  }
+
+  return "";
 }
 
 async function apiFetch(path, token, options) {
@@ -470,7 +506,7 @@ async function main() {
   const url = args.url;
   const filePath = args.file;
   const outputDir = args.output;
-  const token = args.token ?? process.env.MINERU_API_TOKEN ?? "";
+  const token = resolveMineruToken(args);
   const language = args.language ?? "ch";
   const enableOcr = args["no-ocr"] !== "true";
   const pageRanges = args.pages;
@@ -486,13 +522,14 @@ async function main() {
   if (!token) {
     console.error(`缺少 MinerU API key。
 
-请先设置 MINERU_API_TOKEN 环境变量，或在命令中传入 --token。
+请在 skill 目录下创建 .env 文件，并填入：
+  MINERU_API_TOKEN=你的 MinerU API key
 
-PowerShell 临时设置：
-  $env:MINERU_API_TOKEN="你的 MinerU API key"
+如果已安装本 skill，可直接编辑：
+  ${join(SKILL_DIR, ".env")}
 
-PowerShell 持久设置：
-  setx MINERU_API_TOKEN "你的 MinerU API key"
+也可以使用环境变量 MINERU_API_TOKEN，或使用：
+  ${join(homedir(), ".config", "my-agent-skills", "mineru.env")}
 
 然后重新运行本命令。`);
     process.exit(1);

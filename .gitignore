@@ -2,6 +2,7 @@
 node_modules/
 reports/
 *.log
+.env
 
 # Keep release artifacts optional; remove this line if you want to commit .skill files.
 # dist/*.skill

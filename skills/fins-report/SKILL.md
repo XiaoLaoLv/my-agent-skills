@@ -33,21 +33,28 @@ node scripts/process_report.mjs \
 
 ## MinerU API key
 
-用户需要自行提供 MinerU API key。推荐使用环境变量，不要把 key 写入仓库、`SKILL.md`、`.skill` 包或聊天记录。
+用户需要自行提供 MinerU API key。安装脚本会在本 skill 目录下根据 `.env.example` 创建 `.env`，请让用户自己填写：
 
-PowerShell 临时设置（只对当前终端有效）：
+```bash
+MINERU_API_TOKEN=你的 MinerU API key
+```
+
+不要把 `.env`、API key、`--token` 参数值写入仓库、`SKILL.md`、`.skill` 包或聊天记录。
+
+脚本读取顺序：
+
+1. `--token`
+2. 环境变量 `MINERU_API_TOKEN`
+3. 本 skill 目录下的 `.env`
+4. `~/.config/my-agent-skills/mineru.env`
+
+如果缺少 token，脚本会打印 `.env` 的具体位置并提醒用户填写。
+
+PowerShell 临时设置（只对当前终端有效）仍可使用：
 
 ```powershell
 $env:MINERU_API_TOKEN="你的 MinerU API key"
 ```
-
-PowerShell 持久设置（重新打开终端后生效）：
-
-```powershell
-setx MINERU_API_TOKEN "你的 MinerU API key"
-```
-
-脚本会优先读取 `--token`，其次读取 `MINERU_API_TOKEN` 环境变量。只有在用户明确要求且理解风险时，才使用 `--token` 直接传入。
 
 其他参数：`--language`（默认 ch）、`--no-ocr true`（禁用 OCR）。
 

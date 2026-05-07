@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const { cpSync, existsSync, mkdirSync, readdirSync, rmSync, statSync } = require("node:fs");
+const { copyFileSync, cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } = require("node:fs");
 const { homedir } = require("node:os");
 const { join, resolve } = require("node:path");
 
@@ -19,11 +19,25 @@ function main() {
   for (const skillName of skillNames) {
     const source = join(skillsDir, skillName);
     const target = join(targetDir, skillName);
+    const envFile = join(target, ".env");
+    const existingEnv = existsSync(envFile) ? readFileSync(envFile) : null;
+
     rmSync(target, { recursive: true, force: true });
     cpSync(source, target, {
       recursive: true,
-      filter: (path) => !path.split(/[/\\]/).includes("node_modules") && !path.endsWith(".DS_Store"),
+      filter: (path) => {
+        const parts = path.split(/[/\\]/);
+        return !parts.includes("node_modules") && !path.endsWith(".DS_Store") && !path.endsWith(`${skillName}/.env`);
+      },
     });
+    const envExample = join(target, ".env.example");
+    if (existingEnv) {
+      writeFileSync(envFile, existingEnv, { mode: 0o600 });
+      console.log(`  Preserved existing ${envFile}`);
+    } else if (existsSync(envExample)) {
+      copyFileSync(envExample, envFile);
+      console.log(`  Created ${envFile}; please fill in required secrets.`);
+    }
     console.log(`Installed ${skillName} -> ${target}`);
   }
 }
